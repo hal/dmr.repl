@@ -12,6 +12,13 @@ resolvers ++= Seq(
     "JBoss Repository" at "https://repository.jboss.org/nexus/content/groups/public/"
     )
 
+ initialCommands += """
+    import org.jboss.as.controller.client._
+    import java.net._
+    import org.jboss.dmr.ModelNode
+    val client = ModelControllerClient.Factory.create(InetAddress.getByName("127.0.0.1"), 9999)
+ """
+
 libraryDependencies ++= {
     val sprayVersion = "1.2-20130710"
     Seq(
