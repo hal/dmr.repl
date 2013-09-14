@@ -14,9 +14,10 @@ resolvers ++= Seq(
 
  initialCommands += """
     import org.jboss.as.controller.client._
+    import org.jboss.as.controller.descriptions.ModelDescriptionConstants._
     import java.net._
     import org.jboss.dmr.ModelNode
-    val client = ModelControllerClient.Factory.create(InetAddress.getByName("127.0.0.1"), 9999)
+    import ShellCommands._
  """
 
 libraryDependencies ++= {
