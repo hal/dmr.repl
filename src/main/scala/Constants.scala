@@ -1,7 +1,5 @@
 
-package org.jboss.as.controller.descriptions
-
-object ModelDescriptionConstants {
+object Constants {
   // KEEP THESE IN ALPHABETICAL ORDER!
 
   val ACCESS_TYPE = "access-type";

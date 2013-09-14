@@ -13,11 +13,9 @@ resolvers ++= Seq(
     )
 
  initialCommands += """
-    import org.jboss.as.controller.client._
-    import org.jboss.as.controller.descriptions.ModelDescriptionConstants._
-    import java.net._
     import org.jboss.dmr.ModelNode
     import ShellCommands._
+    import Constants._
  """
 
 libraryDependencies ++= {
