@@ -1,4 +1,4 @@
 dmr-repl
 ========
 
-A REPL shell for managing Wildfly server instances. Build's on sbt and leverages the scala REPL at it's core.
+A REPL shell for managing Wildfly server instances. Build on sbt and the scala REPL at it's core.
