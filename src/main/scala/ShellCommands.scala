@@ -7,6 +7,8 @@ import org.jboss.dmr.ModelNode
  */
 object ShellCommands {
 
+  import java.io.ByteArrayInputStream
+
   val storageDelegate = new Storage()
 
   def connect(host: String = "127.0.0.1", port: Int = 9999) :ControllerClient = {
@@ -18,6 +20,18 @@ object ShellCommands {
   def createClient = new ControllerClient
 
   def storage() = storageDelegate
+
+  def fromBase64(base64: String) : Option[ModelNode] = {
+    try {
+      Some(
+        ModelNode.fromBase64(
+          new ByteArrayInputStream(base64.getBytes())
+        )
+      )
+    } catch {
+      case ex: java.lang.Throwable => None
+    }
+  }
 }
 
 /**
