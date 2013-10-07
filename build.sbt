@@ -15,10 +15,11 @@ resolvers ++= Seq(
     )
 
  initialCommands += """
+    import scala.concurrent.ExecutionContext.Implicits.global
     import org.jboss.dmr.scala._
     import org.jboss.dmr.scala.ModelNode
     import org.jboss.dmr.scala.Response
-    import ShellCommands._
+    import org.jboss.dmr.scala.ShellCommands._
  """
 
 libraryDependencies ++= {
