@@ -1,49 +1,37 @@
-dmr-repl
-========
+# DMR.repl
 
-A REPL shell for managing Wildfly server instances. Build on sbt and the scala REPL at it's core.
+A REPL shell for managing Wildfly server instances. Build on [DMR.scala](https://github.com/hpehl/dmr.scala) SBT and the Scala REPL at it's core.
 
+## Execute DMR Operations
 
 ```scala
-
-scala> val client = connect()
-client: ControllerClient = ControllerClient@3aeece0e
-
-
-scala> storage.contents
-root
-
-
-scala> val op = storage.load("root").get
-op: org.jboss.dmr.ModelNode =
-{
-    "address" => [],
-    "operation" => "read-resource"
+val client = connect()
+val response = client.execute(
+  ModelNode()
+  at ("subsystem" -> "datasources") / ("data-source" -> "ExampleDS")
+  op 'read_resource
+)
+response match {
+  case Some(node) => node match {
+    case ModelNode(Response.Success, result) => println(s"Successful DMR operation: $result")
+    case ModelNode(Response.Failed, failure) => println(s"DMR operation failed: $failure")
+    case _ => println("Undefined result")
+  }
+  case None => println("Error reading response")
 }
+```
 
-scala> client.execute(op)
-res4: Option[org.jboss.dmr.ModelNode] =
-Some({
-    "outcome" => "success",
-    "result" => {
-        "management-major-version" => 1,
-        "management-micro-version" => 0,
-        "management-minor-version" => 4,
-        "name" => "radio-86rk",
-        "namespaces" => [],
-        "product-name" => "EAP",
-        "product-version" => "6.2.0.Alpha1",
-        "profile-name" => undefined,
-        "release-codename" => "Janus",
-        "release-version" => "7.3.0-redhat-SNAPSHOT",
-        "schema-locations" => [],
-        "core-service" => {
-            "management" => undefined,
-            "service-container" => undefined,
-            "module-loading" => undefined,
-            "server-environment" => undefined,
-            "platform-mbean" => undefined,
-            "patching" => undefi...
-scala>
+## Local Storage
 
+```scala
+val node = ModelNode() at ("core-service" -> "platform-mbean") / ("type" -> "runtime") op 'read_resource(
+  'attributes_only -> true,
+  'include_runtime -> false,
+  'recursive_depth -> 3,
+  'custom_parameter -> "custom-value"
+)
+storage.save(node, "mbean")
+
+// later on
+val node = storage.load("mbean").get
 ```

@@ -1,6 +1,8 @@
 name := """dmr-repl"""
 
-version := "1.0"
+organization := "org.jboss.dmr"
+
+version := "0.1-SNAPSHOT"
 
 scalaVersion := "2.10.2"
 
@@ -13,15 +15,17 @@ resolvers ++= Seq(
     )
 
  initialCommands += """
-    import org.jboss.dmr.ModelNode
+    import org.jboss.dmr.scala._
+    import org.jboss.dmr.scala.ModelNode
+    import org.jboss.dmr.scala.Response
     import ShellCommands._
-    import Constants._
  """
 
 libraryDependencies ++= {
     val sprayVersion = "1.2-20130710"
     Seq(
         "org.scalatest" %% "scalatest" % "1.9.1" % "test",
+        "org.jboss.dmr" %% "dmr-scala" % "0.1-SNAPSHOT",
         "junit" % "junit" % "4.11" % "test",
         "com.novocode" % "junit-interface" % "0.7" % "test->default",
         "org.wildfly" % "wildfly-controller-client" % "8.0.0.Alpha4"
@@ -29,4 +33,3 @@ libraryDependencies ++= {
 }
 
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
-
