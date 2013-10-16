@@ -1,34 +1,95 @@
 # DMR.repl
 
-A REPL shell for managing Wildfly server instances. Build on [DMR.scala](https://github.com/hpehl/dmr.scala) SBT and the Scala REPL at it's core.
+A REPL shell for managing WildFly server instances. Build on [DMR.scala](https://github.com/hpehl/dmr.scala), SBT and
+the Scala REPL at it's core.
+
+## Connect
+
+Use the following code snippet to establish a connection to a running WildFly server.
+
+```scala
+import org.jboss.dmr.repl.Client._
+
+// Connects to 127.0.0.1:9999
+val client  = connect()
+
+// Connects to specified host:port
+val client = connect("homer", 9876)
+```
+
+Please note that you will receive a client no matter whether the WildFly server is running or not. Only if an
+operation is executed, a connection is established.
 
 ## Execute DMR Operations
 
+To execute an operation you can choose between `!` for synchronous and `?` for asynchronous execution. The
+synchronous method returns with a `Try[ModelNode]`, the asynchronous with a `Future[ModelNode]`.
+
 ```scala
-val client = connect()
 val node = ModelNode() at ("subsystem" -> "datasources") op 'read_resource
 
-def processResponse(response: ModelNode): Unit = response match {
-  case Response(Response.Success, result) => println(s"Success: $result")
-  case Response(Response.Failure, failure) => println(s"Failed: $failure")
-  case _ => println(s"Response not parsable: $response")
+import org.jboss.dmr.scala.Response.{Success, Failure}
+(client ! node) map {
+  case Response(Success, result) => ...
+  case Response(Failure, failure) => ...
 }
 
-// execute sync
-(client ! node) match {
-  case Some(response) => processResponse(response)
-  case None => println("Error reading response")
-}
-
-// execute async
 import scala.util.{Success, Failure}
 (client ? node).onComplete {
-  case Success(response) => processResponse(response)
-  case Failure(ex) => println(s"DMR operation failed: $ex")
+  case Success(response) => ...
+  case Failure(ex) => ...
 }
 ```
 
+## DMR Scripts
+
+If you have a more advanced use cases or want to chain several operation, scripts are the way to go. Create a
+subclass of `Script` and override the `code` method. Scripts carry a type parameter for the expected result.
+Furthermore they use an implicit client which is defined in the clients companion object.
+
+```scala
+import org.jboss.dmr.scala._
+import org.jboss.dmr.repl._
+import org.jboss.dmr.repl.Response._
+
+case class Version(major: Int, minor: Int, micro: Int = 0)
+case class Extension(name: String, version: Version)
+
+class Extensions extends Script[Traversable[Extension]]{
+  def code = {
+    val node = ModelNode() at root op 'read_children_resources(
+      'child_type -> "extension",
+      'recursive_depth -> 2
+    )
+    client ! node map {
+      case Response(Success, result) => {
+        for {
+          (name, extension) <- result
+          (_, subsystem) = extension("subsystem").head
+          major = subsystem("management-major-version").asInt getOrElse -1
+          micro = subsystem("management-micro-version").asInt getOrElse -1
+          minor = subsystem("management-minor-version").asInt getOrElse -1
+        } yield Extension(name, Version(major, minor, micro))
+      }
+      case Response(Failure, failure) => throw new ScriptException(failure)
+    }
+  }
+}
+```
+
+Execute a script using its run method:
+
+```scala
+val script = new Extensions
+val extensions = scripts.run()
+```
+
+If all goes well, this will give you a `Success` with the list of the installed extensions and its versions.
+
 ## Local Storage
+
+You can save and load model nodes to and from the local file system. By default they are written as base64
+to `~/.sbt/node_<counter>`, but you can choose another folder and/or filename.
 
 ```scala
 val node = ModelNode() at ("core-service" -> "platform-mbean") / ("type" -> "runtime") op 'read_resource(
@@ -37,8 +98,17 @@ val node = ModelNode() at ("core-service" -> "platform-mbean") / ("type" -> "run
   'recursive_depth -> 3,
   'custom_parameter -> "custom-value"
 )
+
+// Uses an implicit conversion and the default folder and filename
+node.save()
+
+// Uses a storage using the folder 'nodes' in the current folder and saves the node as 'mbean'
+val storage = new Storage(new java.io.File("nodes"))
 storage.save(node, "mbean")
 
-// later on
-val node = storage.load("mbean").get
+// load by name
+val copy = storage.load("mbean")
+
+// get rid of the saved node
+storage.remove("mbean")
 ```
