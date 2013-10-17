@@ -71,7 +71,7 @@ val script = new About()
 val node = scripts.run()
 ```
 
-Please see the [samples](tree/master/src/main/scala/org/jboss/dmr/repl/samples) package for more advanced
+Please see the [samples](src/main/scala/org/jboss/dmr/repl/samples) package for more advanced
 samples.
 
 ## Local Storage
