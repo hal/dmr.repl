@@ -7,6 +7,7 @@ import org.jboss.dmr.repl.Response._
 case class Version(major: Int, minor: Int, micro: Int = 0)
 case class Extension(name: String, version: Version)
 
+/** Reads the installed extensions and returns them as a list of [[org.jboss.dmr.repl.samples.Extension]]s */
 class ListExtensions extends Script[Traversable[Extension]]{
   def code = {
     val node = ModelNode() at root op 'read_children_resources(

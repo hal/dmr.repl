@@ -44,34 +44,21 @@ import scala.util.{Success, Failure}
 
 ## DMR Scripts
 
-If you have a more advanced use cases or want to chain several operation, scripts are the way to go. Create a
-subclass of `Script` and override the `code` method. Scripts carry a type parameter for the expected result.
-Furthermore they use an implicit client which is defined in the clients companion object.
+If you have a more advanced use cases or want to chain several operations, scripts are the way to go. To write a script
+create a subclass of `Script` and override the `code` method. Scripts carry a type parameter for the expected result.
+Furthermore they rely on an implicit client instance which is brought into scope by the clients companion object. So
+please make sure you `import org.jboss.dmr.repl.Client._` when you run your script.
 
 ```scala
 import org.jboss.dmr.scala._
 import org.jboss.dmr.repl._
-import org.jboss.dmr.repl.Response._
+import org.jboss.dmr.repl.Response.{Success, Failure}
 
-case class Version(major: Int, minor: Int, micro: Int = 0)
-case class Extension(name: String, version: Version)
-
-class ListExtensions extends Script[Traversable[Extension]]{
+class About extends Script[ModelNode] {
   def code = {
-    val node = ModelNode() at root op 'read_children_resources(
-      'child_type -> "extension",
-      'recursive_depth -> 2
-    )
+    val node = ModelNode() at root op 'read_resource
     client ! node map {
-      case Response(Success, result) => {
-        for {
-          (name, extension) <- result
-          (_, subsystem) = extension("subsystem").head
-          major = subsystem("management-major-version").asInt getOrElse -1
-          micro = subsystem("management-micro-version").asInt getOrElse -1
-          minor = subsystem("management-minor-version").asInt getOrElse -1
-        } yield Extension(name, Version(major, minor, micro))
-      }
+      case Response(Success, result) => result
       case Response(Failure, failure) => throw new ScriptException(failure)
     }
   }
@@ -81,11 +68,12 @@ class ListExtensions extends Script[Traversable[Extension]]{
 Execute a script using its run method:
 
 ```scala
-val script = new ListExtensions
-val extensions = scripts.run()
+val script = new About()
+val node = scripts.run()
 ```
 
-If all goes well, this will give you a `Success` with the list of the installed extensions and its versions.
+Please see the [samples](dmr-repl/tree/master/src/main/scala/org/jboss/dmr/repl/samples) package for more advanced
+samples.
 
 ## Local Storage
 

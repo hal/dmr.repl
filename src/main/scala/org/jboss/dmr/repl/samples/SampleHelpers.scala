@@ -4,6 +4,7 @@ import org.jboss.dmr.repl.{Response, Script}
 import org.jboss.dmr.scala.ModelNode
 import org.jboss.dmr.repl.Response._
 
+/** Provides helper methods for the samples */
 trait SampleHelpers[T] {
   this: Script[T] =>
 

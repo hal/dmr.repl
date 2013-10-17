@@ -6,6 +6,7 @@ import java.net.InetAddress
 import org.jboss.as.controller.client.ModelControllerClient
 import org.jboss.dmr.scala._
 
+/** Provides an implicit default client which is used by scripts */
 object Client {
   implicit val defaultClient = new Client
 
@@ -14,7 +15,7 @@ object Client {
   def close() = defaultClient.close()
 }
 
-/** DMR client */
+/** Client for making DMR calls */
 class Client {
   private[repl] var connection: Option[ModelControllerClient] = None
 

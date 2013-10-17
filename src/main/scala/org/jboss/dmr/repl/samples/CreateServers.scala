@@ -4,11 +4,15 @@ import org.jboss.dmr.scala._
 import org.jboss.dmr.repl._
 import org.jboss.dmr.repl.Response._
 
+/**
+ * Creates the servers provided as constructor parameter. Hosts specified in the server instances must exist, whereas
+ * groups are created on demand.
+ */
 class CreateServers(servers: Seq[Server], portOffset: Int = 10) extends Script[ModelNode] with SampleHelpers[ModelNode] {
 
   override def code = {
     // create non existing groups using a composite operation
-    val serversWithNonExistingGroup = servers.filter(noGroup).distinct
+    val serversWithNonExistingGroup = servers.filter(noGroup)
     val groupsToCreate = serversWithNonExistingGroup.map(_.group).distinct
     val goon = if (groupsToCreate.isEmpty) util.Success(ModelNode())
     else {
@@ -19,11 +23,11 @@ class CreateServers(servers: Seq[Server], portOffset: Int = 10) extends Script[M
       client ! ModelNode.composite(nodes)
     }
 
-    // create servers with valid hosts in another composite
+    // create servers in another composite
     goon match {
       case util.Success(_) => {
         val serversWithExistingHosts = servers.filter(hostExists).distinct
-        val nodes = serversWithExistingHosts.zipWithIndex.map {
+        val nodes = serversWithExistingHosts.zipWithIndex map {
           case (server, index) => {
             ModelNode() at ("host" -> server.host) / ("server-config" -> server.name) op 'add(
               'group -> server.group,

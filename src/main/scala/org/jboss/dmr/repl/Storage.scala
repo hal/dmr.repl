@@ -5,6 +5,7 @@ import java.io.{FileInputStream, FileOutputStream, File}
 import org.jboss.dmr.{ModelNode => JavaModelNode}
 import org.jboss.dmr.scala._
 
+/** Provides an implicit conversion to call `save()` on [[org.jboss.dmr.scala.ModelNode]]s */
 object Storage {
   val defaultStorage = new Storage
 

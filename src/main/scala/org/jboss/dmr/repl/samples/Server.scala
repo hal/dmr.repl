@@ -1,5 +1,6 @@
 package org.jboss.dmr.repl.samples
 
+/** Provides a factory method to quickly generate some server instances */
 object Servers {
   def apply(size: Int) = {
     for {
@@ -10,4 +11,5 @@ object Servers {
   }
 }
 
+/** Simple data holder for a server instance */
 case class Server(group: String, host: String, name: String)

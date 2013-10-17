@@ -4,6 +4,7 @@ import org.jboss.dmr.scala._
 import org.jboss.dmr.repl._
 import org.jboss.dmr.repl.Response._
 
+/** Removes the servers provided as constructor parameter. Running and non existing servers are skipped. */
 class RemoveServers(servers: Seq[Server]) extends Script[ModelNode] {
 
   override def code = {
@@ -20,7 +21,7 @@ class RemoveServers(servers: Seq[Server]) extends Script[ModelNode] {
       } getOrElse false
     }
 
-    // delete remaining server using a composite
+    // delete servers using a composite
     if (stoppedAndExistingServerNodes.nonEmpty) {
       val nodes = stoppedAndExistingServerNodes.map {
         case (server, _) => ModelNode() at ("host" -> server.host) / ("server-config" -> server.name) op 'remove
