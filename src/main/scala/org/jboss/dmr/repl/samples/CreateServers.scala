@@ -2,30 +2,53 @@ package org.jboss.dmr.repl.samples
 
 import org.jboss.dmr.scala._
 import org.jboss.dmr.repl._
-import org.jboss.dmr.repl.Response.{Success, Failure}
+import org.jboss.dmr.repl.Response._
 
-/*
-for {
-  index <- 1 to 5
-  group = if (index % 2 == 0) "main-server-group" else "new-server-group"
-  name = s"server-$index"
-} yield Server("master", group, name)
-*/
-case class Server(host: String, group: String, name: String)
-
-class CreateServers(servers: Seq[Server], portOffset: Int = 100) extends Script[String] {
-  val check = "\\u2713"
+class CreateServers(servers: Seq[Server], portOffset: Int = 10) extends Script[ModelNode] with SampleHelpers[ModelNode] {
 
   override def code = {
-    // check host: if host does not exists skip server
-    // check group: if group does not exist, create with defaults
-    // check server: if already exist skip with warning
-    // create server asny
-    // wait for all servers to be created
-    val node = ModelNode() at root op 'read_resource
-    client ! node map {
-      case Response(Success, result) => "All servers created"
-      case Response(Failure, failure) => throw new ScriptException(failure)
+    // create non existing groups using a composite operation
+    val serversWithNonExistingGroup = servers.filter(noGroup).distinct
+    val groupsToCreate = serversWithNonExistingGroup.map(_.group).distinct
+    val goon = if (groupsToCreate.isEmpty) util.Success(ModelNode())
+    else {
+      val nodes = groupsToCreate.map(group => ModelNode() at ("server-group" -> group) op 'add(
+        'profile -> "full",
+        'socket_binding_group -> "full-sockets")
+      )
+      client ! ModelNode.composite(nodes)
     }
+
+    // create servers with valid hosts in another composite
+    goon match {
+      case util.Success(_) => {
+        val serversWithExistingHosts = servers.filter(hostExists).distinct
+        val nodes = serversWithExistingHosts.zipWithIndex.map {
+          case (server, index) => {
+            ModelNode() at ("host" -> server.host) / ("server-config" -> server.name) op 'add(
+              'group -> server.group,
+              'socket_binding_group -> "full-sockets",
+              'socket_binding_port_offset -> (index * portOffset + portOffset),
+              'auto_start -> false
+            )
+          }
+        }
+        client ! ModelNode.composite(nodes) map {
+          case Response(Success, result) => result
+          case Response(Failure, failure) => throw new ScriptException(failure)
+        }
+      }
+      case util.Failure(ex) => throw new ScriptException(s"Failed to create servers groups: $ex")
+    }
+  }
+
+  private def noGroup(server: Server) = {
+    val node = ModelNode() at root op 'read_children_names('child_type -> "server-group")
+    !stringValuesFromResultList(node).contains(server.group)
+  }
+
+  private def hostExists(server: Server) = {
+    val node = ModelNode() at root op 'read_children_names('child_type -> "host")
+    stringValuesFromResultList(node).contains(server.host)
   }
 }

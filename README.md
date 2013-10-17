@@ -5,7 +5,7 @@ the Scala REPL at it's core.
 
 ## Connect
 
-Use the following code snippet to establish a connection to a running WildFly server.
+Use the following code snippet to create a client for a WildFly server.
 
 ```scala
 import org.jboss.dmr.repl.Client._
@@ -28,7 +28,8 @@ synchronous method returns with a `Try[ModelNode]`, the asynchronous with a `Fut
 ```scala
 val node = ModelNode() at ("subsystem" -> "datasources") op 'read_resource
 
-import org.jboss.dmr.scala.Response.{Success, Failure}
+import org.jboss.dmr.repl.Response
+import org.jboss.dmr.repl.Response.{Success, Failure}
 (client ! node) map {
   case Response(Success, result) => ...
   case Response(Failure, failure) => ...
@@ -55,7 +56,7 @@ import org.jboss.dmr.repl.Response._
 case class Version(major: Int, minor: Int, micro: Int = 0)
 case class Extension(name: String, version: Version)
 
-class Extensions extends Script[Traversable[Extension]]{
+class ListExtensions extends Script[Traversable[Extension]]{
   def code = {
     val node = ModelNode() at root op 'read_children_resources(
       'child_type -> "extension",
@@ -80,7 +81,7 @@ class Extensions extends Script[Traversable[Extension]]{
 Execute a script using its run method:
 
 ```scala
-val script = new Extensions
+val script = new ListExtensions
 val extensions = scripts.run()
 ```
 

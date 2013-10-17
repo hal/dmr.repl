@@ -7,7 +7,7 @@ import org.jboss.dmr.repl.Response._
 case class Version(major: Int, minor: Int, micro: Int = 0)
 case class Extension(name: String, version: Version)
 
-class Extensions extends Script[Traversable[Extension]]{
+class ListExtensions extends Script[Traversable[Extension]]{
   def code = {
     val node = ModelNode() at root op 'read_children_resources(
       'child_type -> "extension",
