@@ -5,20 +5,17 @@ the Scala REPL at it's core.
 
 ## Connect
 
-Use the following code snippet to create a client for a WildFly server.
+To make use of DMR.repl, first thing you'll need is a client for a WildFly server.
 
 ```scala
 import org.jboss.dmr.repl.Client._
 
-// Connects to 127.0.0.1:9999
+// Creates a client and connects to 127.0.0.1:9999
 val client  = connect()
 
 // Connects to specified host:port
 val client = connect("homer", 9876)
 ```
-
-Please note that you will receive a client no matter whether the WildFly server is running or not. Only if an
-operation is executed, a connection is established.
 
 ## Execute DMR Operations
 
@@ -68,11 +65,13 @@ class About extends Script[ModelNode] {
 Execute a script using its run method:
 
 ```scala
+import org.jboss.dmr.repl.Client._
+
 val script = new About()
 val node = scripts.run()
 ```
 
-Please see the [samples](dmr-repl/tree/master/src/main/scala/org/jboss/dmr/repl/samples) package for more advanced
+Please see the [samples](tree/master/src/main/scala/org/jboss/dmr/repl/samples) package for more advanced
 samples.
 
 ## Local Storage
