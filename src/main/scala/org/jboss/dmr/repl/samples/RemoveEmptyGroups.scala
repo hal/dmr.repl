@@ -11,27 +11,26 @@ class RemoveEmptyGroups extends Script[ModelNode] with SampleHelpers[ModelNode] 
   override def code: Try[ModelNode] = {
     // read host names
     val readHosts = ModelNode() at root op 'read_children_names('child_type -> "host")
-    val hosts = stringValuesFromResultList(readHosts)
+    val hosts = stringValues(readHosts)
 
     // read groups attribute from all servers in all hosts
     val nodes = hosts.map(host => ModelNode() at ("host" -> host) / ("server-config" -> "*") op 'read_attribute(
       'name -> "group"))
     val groupsWithServers = client ! ModelNode.composite(nodes) map {
-      case Response(Success, result) => {
+      case Composite(Success, steps) => {
         for {
-          (step, node) <- result
-          stepResult <- node.get("result").toSeq
-          server <- stepResult.values
+          step <- steps // each step contains a list of server configs
+          server <- step.values
           group <- server.get("result")
           name <- group.asString
         } yield name
       }
-      case Response(Failure, failure) => List()
+      case Composite(Failure, failure) => List()
     } getOrElse List()
 
     // read group names and diff with active groups
     val readGroups = ModelNode() at root op 'read_children_names('child_type -> "server-group")
-    val groupsToRemove = stringValuesFromResultList(readGroups) diff groupsWithServers.toList
+    val groupsToRemove = stringValues(readGroups) diff groupsWithServers.toList
 
     // delete empty server groups
     if (groupsToRemove.nonEmpty) {

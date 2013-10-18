@@ -47,15 +47,17 @@ Furthermore they rely on an implicit client instance which is brought into scope
 please make sure you `import org.jboss.dmr.repl.Client._` when you run your script.
 
 ```scala
+import scala.concurrent.duration._
 import org.jboss.dmr.scala._
 import org.jboss.dmr.repl._
-import org.jboss.dmr.repl.Response.{Success, Failure}
+import org.jboss.dmr.repl.Response._
 
-class About extends Script[ModelNode] {
+/** Returns the uptime for the standalone server */
+class Uptime extends Script[Duration] {
   def code = {
-    val node = ModelNode() at root op 'read_resource
+    val node = ModelNode() at ("core-service" -> "platform-mbean") / ("type" -> "runtime") op 'read_attribute('name -> "uptime")
     client ! node map {
-      case Response(Success, result) => result
+      case Response(Success, result) => result.asLong.get.millis
       case Response(Failure, failure) => throw new ScriptException(failure)
     }
   }
@@ -67,8 +69,7 @@ Execute a script using its run method:
 ```scala
 import org.jboss.dmr.repl.Client._
 
-val script = new About()
-val node = scripts.run()
+val uptime = new Uptime().run
 ```
 
 Please see the [samples](src/main/scala/org/jboss/dmr/repl/samples) package for more advanced

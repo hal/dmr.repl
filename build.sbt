@@ -10,6 +10,7 @@ retrieveManaged := true
 
 scalacOptions ++= Seq(
   "-language:implicitConversions",
+  "-language:postfixOps",
   "-feature",
   "-deprecation"
 )

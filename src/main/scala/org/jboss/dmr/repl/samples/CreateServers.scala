@@ -48,11 +48,11 @@ class CreateServers(servers: Seq[Server], portOffset: Int = 10) extends Script[M
 
   private def noGroup(server: Server) = {
     val node = ModelNode() at root op 'read_children_names('child_type -> "server-group")
-    !stringValuesFromResultList(node).contains(server.group)
+    !stringValues(node).contains(server.group)
   }
 
   private def hostExists(server: Server) = {
     val node = ModelNode() at root op 'read_children_names('child_type -> "host")
-    stringValuesFromResultList(node).contains(server.host)
+    stringValues(node).contains(server.host)
   }
 }
