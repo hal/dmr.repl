@@ -49,7 +49,7 @@ class Uptime extends Script[Map[String, Duration]] with SampleHelpers[Map[String
           case Composite(Failure, failure) => throw new ScriptException(failure.head)
         }
       }
-      case util.Failure(ex) => throw new ScriptException(s"Cannot read Execution mode: $ex")
+      case util.Failure(ex) => throw new ScriptException(s"Cannot read execution mode: $ex")
     }
   }
 }
