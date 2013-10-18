@@ -30,7 +30,7 @@ class RemoveEmptyGroups extends Script[ModelNode] with SampleHelpers[ModelNode] 
 
     // read group names and diff with active groups
     val readGroups = ModelNode() at root op 'read_children_names('child_type -> "server-group")
-    val groupsToRemove = stringValues(readGroups) diff groupsWithServers.toList
+    val groupsToRemove = stringValues(readGroups) diff groupsWithServers.distinct
 
     // delete empty server groups
     if (groupsToRemove.nonEmpty) {
