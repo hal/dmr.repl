@@ -1,6 +1,6 @@
 # DMR.repl
 
-A REPL shell for managing WildFly server instances. Build on [DMR.scala](https://github.com/hpehl/dmr.scala), SBT and
+A REPL shell for managing WildFly server instances. Build on [DMR.scala](https://github.com/hal/dmr.scala), SBT and
 the Scala REPL at it's core.
 
 ## Connect
