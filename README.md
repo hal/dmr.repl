@@ -22,21 +22,119 @@ val client = connect("homer", 9876)
 To execute an operation you can choose between `!` for synchronous and `?` for asynchronous execution. The
 synchronous method returns with a `Try[ModelNode]`, the asynchronous with a `Future[ModelNode]`.
 
+### Synchronous
+
 ```scala
+import org.jboss.dmr.repl.Response.{Success, Failure}
 val node = ModelNode() at ("subsystem" -> "datasources") op 'read_resource
 
-import org.jboss.dmr.repl.Response
-import org.jboss.dmr.repl.Response.{Success, Failure}
 (client ! node) map {
   case Response(Success, result) => ...
   case Response(Failure, failure) => ...
 }
+```
 
+### Asynchronous
+
+```scala
 import scala.util.{Success, Failure}
+val node = ModelNode() at ("subsystem" -> "datasources") op 'read_resource
+
 (client ? node).onComplete {
   case Success(response) => ...
   case Failure(ex) => ...
 }
+```
+
+When executing DMR operations, you can make use of some handy extractors which will return the actual payload of a DMR
+response / composite response. If you execute a DMR operation like this
+
+```scala
+val node = ModelNode() at ("subsystem" -> "datasources") op 'read_resource
+val response = client ! node getOrElse ModelNode.Undefined
+```
+
+`response` will contain the full response:
+
+```json
+{
+    "outcome" => "success",
+    "result" => {
+        "data-source" => {"ExampleDS" => undefined},
+        "jdbc-driver" => {"h2" => undefined},
+        "xa-data-source" => undefined
+    }
+}
+```
+
+If you're just interested in the result, use
+
+```scala
+val Response(Success, result) = response
+```
+
+which will assign a model node to `result` containing
+
+```json
+{
+    "data-source" => {"ExampleDS" => undefined},
+    "jdbc-driver" => {"h2" => undefined},
+    "xa-data-source" => undefined
+}
+```
+
+The same applies to composite operations:
+
+```scala
+val d1 = ModelNode() at ("deployment" -> "foo.war") op 'read_resource
+val d2 = ModelNode() at ("deployment" -> "bar.war") op 'read_resource
+val comp = ModelNode.composite(d1, d2)
+val response = client ! comp getOrElse ModelNode.Undefined
+```
+
+Again `response` will contain the full response with the steps as nested responses:
+
+```json
+{
+    "outcome" => "success",
+    "result" => {
+        "step-1" => {
+            "outcome" => "success",
+            "result" => {
+                "name" => "foo.war",
+                ...
+            }
+        },
+        "step-2" => {
+            "outcome" => "success",
+            "result" => {
+                "name" => "bar.war",
+                ...
+            }
+        }
+    }
+}
+```
+
+To extract just the nested result nodes, use the `Composite` extractor:
+
+```scala
+val Composite(Success, steps) = response
+```
+
+which will give you a `List[ModelNode]`:
+
+```scala
+List(
+{
+    "name" => "foo.war",
+    ...
+},
+{
+    "name" => "bar.war",
+    ...
+})
+
 ```
 
 ## DMR Scripts
