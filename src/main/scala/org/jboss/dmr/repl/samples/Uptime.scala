@@ -15,6 +15,7 @@ class Uptime extends Script[Map[String, Duration]] with SampleHelpers[Map[String
 
     standalone match {
       case util.Success(true) => {
+        // standalone mode
         val node = ModelNode() at ("core-service" -> "platform-mbean") / ("type" -> "runtime") op 'read_attribute('name -> "uptime")
         client ! node map {
           case Response(Success, result) => Map("standalone" -> result.asLong.get.millis)
@@ -22,7 +23,7 @@ class Uptime extends Script[Map[String, Duration]] with SampleHelpers[Map[String
         }
       }
       case util.Success(false) => {
-        // read topology
+        // domain mode: read topology first
         val hosts = stringValues(ModelNode() at root op 'read_children_names('child_type -> "host"))
         val topology = for {
           host <- hosts

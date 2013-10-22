@@ -8,7 +8,7 @@ import org.jboss.dmr.repl.Response._
 trait SampleHelpers[T] {
   this: Script[T] =>
 
-  /** Returns the values from a DMR operation whose result type is a list of string model nodes */
+  /** Returns the string values from a DMR operation whose result type is a list of string model nodes */
   private[samples] def stringValues(node: ModelNode): List[String] = {
     val values = client ! node map {
       case Response(Success, result) => {

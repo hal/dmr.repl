@@ -12,7 +12,8 @@ class CreateServers(servers: Seq[Server], portOffset: Int = 10) extends Script[M
 
   override def code = {
     // create non existing groups using a composite operation
-    val serversWithNonExistingGroup = servers.filter(noGroup)
+    val groups = stringValues(ModelNode() at root op 'read_children_names('child_type -> "server-group"))
+    val serversWithNonExistingGroup = servers.filter(server => !groups.contains(server.group))
     val groupsToCreate = serversWithNonExistingGroup.map(_.group).distinct
     val goon = if (groupsToCreate.isEmpty) util.Success(ModelNode())
     else {
@@ -26,7 +27,8 @@ class CreateServers(servers: Seq[Server], portOffset: Int = 10) extends Script[M
     // create servers in another composite
     goon match {
       case util.Success(_) => {
-        val serversWithExistingHosts = servers.filter(hostExists).distinct
+        val hosts = stringValues(ModelNode() at root op 'read_children_names('child_type -> "host"))
+        val serversWithExistingHosts = servers.filter(server => hosts.contains(server.host)).distinct
         val nodes = serversWithExistingHosts.zipWithIndex map {
           case (server, index) => {
             ModelNode() at ("host" -> server.host) / ("server-config" -> server.name) op 'add(
@@ -44,15 +46,5 @@ class CreateServers(servers: Seq[Server], portOffset: Int = 10) extends Script[M
       }
       case util.Failure(ex) => throw new ScriptException(s"Failed to create servers groups: $ex")
     }
-  }
-
-  private def noGroup(server: Server) = {
-    val node = ModelNode() at root op 'read_children_names('child_type -> "server-group")
-    !stringValues(node).contains(server.group)
-  }
-
-  private def hostExists(server: Server) = {
-    val node = ModelNode() at root op 'read_children_names('child_type -> "host")
-    stringValues(node).contains(server.host)
   }
 }
