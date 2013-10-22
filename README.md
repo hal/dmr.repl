@@ -146,13 +146,14 @@ please make sure you `import org.jboss.dmr.repl.Client._` when you run your scri
 
 ```scala
 import scala.concurrent.duration._
+import scala.util.Try
 import org.jboss.dmr.scala._
 import org.jboss.dmr.repl._
 import org.jboss.dmr.repl.Response._
 
 /** Returns the uptime for the standalone server */
 class Uptime extends Script[Duration] {
-  def code = {
+  def code: Try[Duration] = {
     val node = ModelNode() at ("core-service" -> "platform-mbean") / ("type" -> "runtime") op 'read_attribute('name -> "uptime")
     client ! node map {
       case Response(Success, result) => result.asLong.get.millis
@@ -167,7 +168,8 @@ Execute a script using its run method:
 ```scala
 import org.jboss.dmr.repl.Client._
 
-val uptime = new Uptime().run
+connect()
+val uptime = new Uptime().run()
 ```
 
 Please see the [samples](src/main/scala/org/jboss/dmr/repl/samples) package for more advanced
