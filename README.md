@@ -56,7 +56,7 @@ val response = client ! node getOrElse ModelNode.Undefined
 
 `response` will contain the full response:
 
-```json
+```
 {
     "outcome" => "success",
     "result" => {
@@ -73,9 +73,9 @@ If you're just interested in the result, use
 val Response(Success, result) = response
 ```
 
-which will assign a model node to `result` containing
+which will assign a model node to `result` containing just the payload:
 
-```json
+```
 {
     "data-source" => {"ExampleDS" => undefined},
     "jdbc-driver" => {"h2" => undefined},
@@ -92,9 +92,9 @@ val comp = ModelNode.composite(d1, d2)
 val response = client ! comp getOrElse ModelNode.Undefined
 ```
 
-Again `response` will contain the full response with the steps as nested responses:
+Again `response` will contain the full response with the all steps and nested responses:
 
-```json
+```
 {
     "outcome" => "success",
     "result" => {
