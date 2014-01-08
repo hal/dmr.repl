@@ -31,6 +31,8 @@ class Uptime extends Script[Map[String, Duration]] with SampleHelpers[Map[String
           server <- servers
         } yield (host, server)
 
+        // TODO Filter stoped servers
+
         // map topology to model node ops
         val nodes = topology.map {
           case (host, server) => {
