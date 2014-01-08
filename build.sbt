@@ -4,7 +4,7 @@ organization := "org.jboss"
 
 version := "0.1.0"
 
-scalaVersion := "2.10.2"
+scalaVersion := "2.10.3"
 
 retrieveManaged := true
 
@@ -33,3 +33,26 @@ initialCommands += """
   import org.jboss.dmr.repl.Client._
   import org.jboss.dmr.repl.Storage._
                    """
+
+publishMavenStyle := true
+
+pomExtra :=
+  <licenses>
+    <license>
+      <name>lgpl</name>
+      <url>http://repository.jboss.com/licenses/lgpl.txt</url>
+    </license>
+  </licenses>
+    <url>
+      https://github.com/hal/dmr.scala
+    </url>
+
+publishTo <<= version { (v: String) =>
+  val nexus = "https://repository.jboss.org/nexus/"
+  if (v.trim.endsWith("SNAPSHOT"))
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+}
+
+credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
