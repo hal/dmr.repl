@@ -1,8 +1,7 @@
 package org.jboss.dmr.repl
 
-import scala.Some
-import org.jboss.dmr.scala.ModelNode
 import org.jboss.dmr.repl.Response._
+import org.jboss.dmr.scala.ModelNode
 
 /** Response constants and extractor for parsing responses to DMR operations */
 object Response {

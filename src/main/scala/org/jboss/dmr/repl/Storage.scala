@@ -1,9 +1,9 @@
 package org.jboss.dmr.repl
 
-import scala.util.Try
-import java.io.{FileInputStream, FileOutputStream, File}
-import org.jboss.dmr.{ModelNode => JavaModelNode}
+import java.io.{File, FileInputStream, FileOutputStream}
 import org.jboss.dmr.scala._
+import org.jboss.dmr.{ModelNode => JavaModelNode}
+import scala.util.Try
 
 /** Provides an implicit conversion to call `save()` on [[org.jboss.dmr.scala.ModelNode]]s */
 object Storage {

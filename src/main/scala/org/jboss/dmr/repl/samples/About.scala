@@ -1,8 +1,8 @@
 package org.jboss.dmr.repl.samples
 
-import org.jboss.dmr.scala._
-import org.jboss.dmr.repl._
 import org.jboss.dmr.repl.Response._
+import org.jboss.dmr.repl._
+import org.jboss.dmr.scala._
 
 /** Simplest script one can imagine, which reads and returns the root node */
 class About extends Script[ModelNode] {

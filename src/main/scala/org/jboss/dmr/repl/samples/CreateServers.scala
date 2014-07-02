@@ -1,8 +1,8 @@
 package org.jboss.dmr.repl.samples
 
-import org.jboss.dmr.scala._
-import org.jboss.dmr.repl._
 import org.jboss.dmr.repl.Response._
+import org.jboss.dmr.repl._
+import org.jboss.dmr.scala._
 
 /**
  * Creates the servers provided as constructor parameter. Hosts specified in the server instances must exist, whereas

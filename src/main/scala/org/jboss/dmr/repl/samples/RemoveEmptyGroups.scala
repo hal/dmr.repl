@@ -1,8 +1,8 @@
 package org.jboss.dmr.repl.samples
 
-import org.jboss.dmr.scala._
-import org.jboss.dmr.repl._
 import org.jboss.dmr.repl.Response._
+import org.jboss.dmr.repl._
+import org.jboss.dmr.scala._
 import scala.util.Try
 
 /** Removes empty server groups without assigned servers */

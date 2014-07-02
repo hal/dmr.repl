@@ -1,9 +1,9 @@
 package org.jboss.dmr.repl.samples
 
-import scala.concurrent.duration._
-import org.jboss.dmr.scala._
-import org.jboss.dmr.repl._
 import org.jboss.dmr.repl.Response._
+import org.jboss.dmr.repl._
+import org.jboss.dmr.scala._
+import scala.concurrent.duration._
 
 /** Returns the uptime for the standalone server or for all servers in domain mode */
 class Uptime extends Script[Map[String, Duration]] with SampleHelpers[Map[String, Duration]] {
@@ -14,8 +14,8 @@ class Uptime extends Script[Map[String, Duration]] with SampleHelpers[Map[String
     }
 
     standalone match {
+      // standalone mode
       case util.Success(true) => {
-        // standalone mode
         val node = ModelNode() at ("core-service" -> "platform-mbean") / ("type" -> "runtime") op 'read_attribute('name -> "uptime")
         client ! node map {
           case Response(Success, result) => Map("standalone" -> result.asLong.get.millis)
@@ -31,7 +31,7 @@ class Uptime extends Script[Map[String, Duration]] with SampleHelpers[Map[String
           server <- servers
         } yield (host, server)
 
-        // TODO Filter stoped servers
+        // TODO Filter stopped servers
 
         // map topology to model node ops
         val nodes = topology.map {

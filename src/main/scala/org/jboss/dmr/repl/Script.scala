@@ -1,7 +1,7 @@
 package org.jboss.dmr.repl
 
-import scala.util.{Failure, Try}
 import org.jboss.dmr.scala._
+import scala.util.{Failure, Try}
 
 /** Base class for scripts */
 abstract class Script[T](implicit val client: Client) {

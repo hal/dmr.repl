@@ -2,9 +2,9 @@ name := "dmr-repl"
 
 organization := "org.jboss"
 
-version := "0.1.0"
+version := "0.2.0"
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.11.1"
 
 retrieveManaged := true
 
@@ -21,13 +21,15 @@ resolvers ++= Seq(
 
 // Dependency to DMR.scala is defined in DmrReplBuild.scala as GitHub dependency
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "1.9.1" % "test",
-  "org.wildfly" % "wildfly-controller-client" % "8.0.0.Alpha4"
+  "org.scalatest" %% "scalatest" % "2.2.0" % "test",
+  "org.wildfly" % "wildfly-controller-client" % "8.1.0.Final"
 )
 
 initialCommands += """
   import scala.concurrent.ExecutionContext.Implicits.global
   import scala.language.implicitConversions
+  import org.jboss.dmr.scala._
+  import org.jboss.dmr.scala.ModelNode
   import org.jboss.dmr.scala._
   import org.jboss.dmr.repl._
   import org.jboss.dmr.repl.Client._

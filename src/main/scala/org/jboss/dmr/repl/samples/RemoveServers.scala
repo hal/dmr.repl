@@ -1,14 +1,14 @@
 package org.jboss.dmr.repl.samples
 
-import org.jboss.dmr.scala._
-import org.jboss.dmr.repl._
 import org.jboss.dmr.repl.Response._
+import org.jboss.dmr.repl._
+import org.jboss.dmr.scala._
 
 /** Removes the servers provided as constructor parameter. Running and non existing servers are skipped. */
 class RemoveServers(servers: Seq[Server]) extends Script[ModelNode] {
 
   override def code = {
-    // skip started and non existing servers servers
+    // skip started and non existing servers
     val serverNodes = servers.map(server => {
       val node = ModelNode() at ("host" -> server.host) / ("server-config" -> server.name) op 'read_attribute(
         'name -> "status")

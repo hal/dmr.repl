@@ -1,14 +1,12 @@
 package org.jboss.dmr.repl
 
-import scala.Some
-import scala.concurrent.{Promise, Future}
-import scala.util.Try
-import scala.util.Failure
 import java.net.InetAddress
 import javax.security.auth.callback._
 import javax.security.sasl.RealmCallback
 import org.jboss.as.controller.client.ModelControllerClient
 import org.jboss.dmr.scala._
+import scala.concurrent.{Future, Promise}
+import scala.util.{Failure, Try}
 
 /** Provides an implicit default client which is used by scripts */
 object Client {
