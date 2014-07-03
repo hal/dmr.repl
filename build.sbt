@@ -4,7 +4,7 @@ organization := "org.jboss"
 
 version := "0.2.0"
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.10.4"
 
 retrieveManaged := true
 
