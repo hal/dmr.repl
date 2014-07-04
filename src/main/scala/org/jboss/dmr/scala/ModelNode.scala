@@ -102,7 +102,8 @@ object ModelNode {
 abstract class ModelNode(javaModelNode: JavaModelNode)
   extends Traversable[NodeTuple]
   with TraversableLike[NodeTuple, ModelNode]
-  with ValueConversions {
+  with ValueConversions
+  with Serializable {
 
   /** Returns the underlying Java mode node */
   def underlying = javaModelNode
