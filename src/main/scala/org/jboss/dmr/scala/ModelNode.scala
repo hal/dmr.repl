@@ -1,10 +1,13 @@
 package org.jboss.dmr.scala
 
+import java.util
+
 import org.jboss.dmr.ModelType._
 import org.jboss.dmr.scala.ModelNode.NodeTuple
 import org.jboss.dmr.{ModelType, ModelNode => JavaModelNode}
+import scala.annotation.tailrec
 import scala.collection.JavaConversions._
-import scala.collection.TraversableLike
+import scala.collection.{mutable, TraversableLike}
 import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable.ListBuffer
 
@@ -187,21 +190,32 @@ abstract class ModelNode(javaModelNode: JavaModelNode)
 
   override protected[this] def newBuilder: collection.mutable.Builder[NodeTuple, ModelNode] = ModelNode.newBuilder
 
+  def depth: Int = depth(this)
+
+  private def depth(node: ModelNode): Int = node match {
+    case _: ComplexModelNode =>
+      val childNodes = node.values.filter(_.isInstanceOf[ComplexModelNode])
+      if (childNodes.isEmpty) 0
+      else {
+        val childDepths = childNodes.map(depth(_))
+        1 + childDepths.max
+      }
+    case _ => 0
+  }
+
   /** Traversals the model node tree using inorder */
   def inOrder: List[NodeTuple] = inOrder(underlying)
 
-  private def inOrder(jnode: JavaModelNode): List[NodeTuple] = {
-    jnode.getType match {
-      case OBJECT => jnode.asList().flatMap(inOrder(_)).toList
-      case LIST => List(propAsTuple(jnode))
-      case PROPERTY =>
-        val propValue: JavaModelNode = jnode.asProperty().getValue
-        propValue.getType match {
-          case OBJECT | LIST => List(propAsTuple(jnode)) ++ propValue.asList().flatMap(inOrder(_)).toList
-          case _ => List(propAsTuple(jnode))
-        }
-      case _ => List()
-    }
+  private def inOrder(jnode: JavaModelNode): List[NodeTuple] = jnode.getType match {
+    case OBJECT => jnode.asList().flatMap(inOrder(_)).toList
+    case LIST => List(propAsTuple(jnode))
+    case PROPERTY =>
+      val propValue: JavaModelNode = jnode.asProperty().getValue
+      propValue.getType match {
+        case OBJECT | LIST => List(propAsTuple(jnode)) ++ propValue.asList().flatMap(inOrder(_)).toList
+        case _ => List(propAsTuple(jnode))
+      }
+    case _ => List()
   }
 
   //---------------------------------------- update methods
